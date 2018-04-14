@@ -61,6 +61,9 @@ public class Program {
     private class Tester {
         @Parameter(names = { "--random", "-r" }, description = "Pick random words")
         private boolean random = false;
+
+        @Parameter(names = { "--worst", "-w" }, description = "Pick words with worst assessment")
+        private boolean worst = false;
     
         @Parameter(names = { "--quantity", "-q" }, description = "Quantity of words")
         private int quantity = 20;
@@ -90,9 +93,14 @@ public class Program {
                             .getRelations());
                 }
     
-                Collections.shuffle(relations);
-                relations = relations.subList(0, quantity);
+            } else if (worst == true) {
+                relations.addAll(driver
+                        .getRelationsWithWorstAssessment(quantity));
             } 
+            Collections.shuffle(relations);
+            if (relations.size() > quantity) {
+                relations = relations.subList(0, quantity);
+            }
     
             PlainTextReporter reporter = new PlainTextReporter();
             PlainTextQuestioner questioner = new PlainTextQuestioner();
@@ -115,6 +123,7 @@ public class Program {
             }
 
             System.out.println("\n" + reporter.getReport() + "\n");
+            driver.storeReporter(reporter);
         }
     }
 

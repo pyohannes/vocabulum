@@ -2,6 +2,7 @@ package org.vocabulum.persist;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -15,6 +16,7 @@ import org.vocabulum.data.Unit;
 import org.vocabulum.data.Relation;
 import org.vocabulum.data.Word;
 import org.vocabulum.persist.PersistError;
+import org.vocabulum.report.Reporter;
 
 
 public class SqliteDriver extends PersistDriver {
@@ -51,6 +53,13 @@ public class SqliteDriver extends PersistDriver {
             + " word text NOT NULL,"
             + " annotation text,"
             + " leftright integer,"
+            + " relation integer,"
+            + " FOREIGN KEY(relation) REFERENCES relation(id)"
+            + ");",
+
+              "CREATE TABLE IF NOT EXISTS assessment ("
+            + " id integer PRIMARY KEY,"
+            + " rate integer,"
             + " relation integer,"
             + " FOREIGN KEY(relation) REFERENCES relation(id)"
             + ");",
@@ -128,6 +137,137 @@ public class SqliteDriver extends PersistDriver {
         }
     }
 
+    private String getStringQArray(int size) {
+        List<String> s = new ArrayList<>();
+        while (size > 0) {
+            s.add("?");
+            size -= 1;
+        }
+
+        return "(" + String.join(",", s) + ")";
+    }
+
+    public void storeReporter(Reporter r) throws PersistError {
+        List<Integer> relationIds = new ArrayList<Integer>();
+        for (Reporter.Answer answer : r.getAnswers()) {
+            relationIds.add(answer.relation.getId());
+        }
+
+        HashMap<Integer, Integer> assessments = new HashMap<>();
+
+        String selectAssessments = "SELECT * FROM assessment WHERE id IN " + getStringQArray(relationIds.size());
+        try (PreparedStatement pStmt = conn.prepareStatement(selectAssessments)) 
+        {
+            for (int i = 0; i < relationIds.size(); i++) {
+                pStmt.setInt(i + 1, relationIds.get(i));
+            }
+            ResultSet rs = pStmt.executeQuery();
+            while (rs.next()) {
+                assessments.put(rs.getInt("id"), rs.getInt("rate"));
+            }
+        } catch (SQLException e) {
+            throw new PersistError(e.getMessage());
+        }
+
+        String updateAssessment = "UPDATE assessment SET rate = ? WHERE relation = ?";
+        String insertAssessment = "INSERT INTO assessment(relation, rate) VALUES (?, ?)";
+        for (Reporter.Answer answer : r.getAnswers()) {
+            int id = answer.relation.getId();
+            if (assessments.containsKey(id)) {
+                Integer rate = assessments.get(id);
+                if (answer.correct) {
+                    rate = rate + 1;
+                } else {
+                    rate = rate - 6;
+                }
+                assessments.put(id, rate);
+                try (PreparedStatement pStmt = conn.prepareStatement(updateAssessment)) 
+                {
+                    pStmt.setInt(1, assessments.get(id));
+                    pStmt.setInt(2, id);
+                    pStmt.executeUpdate();
+                } catch (SQLException e) {
+                    throw new PersistError(e.getMessage());
+                }
+            } else {
+                try (PreparedStatement pStmt = conn.prepareStatement(insertAssessment)) 
+                {
+                    pStmt.setInt(1, id);
+                    if (answer.correct) {
+                        pStmt.setInt(2, 1);
+                    } else {
+                        pStmt.setInt(2, 0);
+                    } 
+                    pStmt.executeUpdate();
+                } catch (SQLException e) {
+                    throw new PersistError(e.getMessage());
+                }
+            }
+        }
+    }
+
+    public List<Relation> getRelationsWithWorstAssessment(int maxRet) throws PersistError {
+        String selectAssessments = "SELECT relation, rate FROM assessment ORDER BY rate ASC LIMIT ?";
+
+        List<Integer> relationIds = new ArrayList<>();
+        try (PreparedStatement pStmt = conn.prepareStatement(selectAssessments)) 
+        {
+            pStmt.setInt(1, maxRet);
+            ResultSet rs = pStmt.executeQuery();
+
+            while (rs.next()) {
+                relationIds.add(rs.getInt("relation"));
+            }
+        } catch (SQLException e) {
+            throw new PersistError(e.getMessage());
+        }
+
+        String selectRelation = "SELECT * FROM relation WHERE id IN " + getStringQArray(relationIds.size());
+        List<Relation> relations = new ArrayList<>();
+        try (PreparedStatement pStmt = conn.prepareStatement(selectRelation)) 
+        {
+            for (int i = 0; i < relationIds.size(); i++) {
+                pStmt.setInt(i + 1, relationIds.get(i));
+            }
+            ResultSet rs = pStmt.executeQuery();
+
+            while (rs.next()) {
+                Relation r = new Relation();
+                r.setId(rs.getInt("id"));
+                r.setDirection(rs.getInt("direction"));
+                retrieveWords(r);
+                relations.add(r);
+            }
+        } catch (SQLException e) {
+            throw new PersistError(e.getMessage());
+        }
+
+        if (relations.size() < maxRet) {
+            selectRelation = "SELECT * FROM relation WHERE id NOT IN " + getStringQArray(relationIds.size()) + "LIMIT ?";
+            try (PreparedStatement pStmt = conn.prepareStatement(selectRelation)) 
+            {
+                int i;
+                for (i = 0; i < relationIds.size(); i++) {
+                    pStmt.setInt(i + 1, relationIds.get(i));
+                }
+                pStmt.setInt(i + 1, maxRet - relations.size());
+                ResultSet rs = pStmt.executeQuery();
+    
+                while (rs.next()) {
+                    Relation r = new Relation();
+                    r.setId(rs.getInt("id"));
+                    r.setDirection(rs.getInt("direction"));
+                    retrieveWords(r);
+                    relations.add(r);
+                }
+            } catch (SQLException e) {
+                throw new PersistError(e.getMessage());
+            }
+        }
+
+        return relations;
+    }
+
     public void storeUnit(Unit u) throws PersistError {
         String insertUnit = "INSERT INTO unit(name) VALUES (?)";
         try (PreparedStatement pStmt = conn.prepareStatement(insertUnit)) 
@@ -141,6 +281,8 @@ public class SqliteDriver extends PersistDriver {
 
         String insertRelation = "INSERT INTO relation(direction,unit) "
                               + "VALUES (?,?)";
+        String insertAssessment = "INSERT INTO assessment(relation,rate) "
+                              + "VALUES (?,?)";
         String insertWord = "INSERT INTO word(word,annotation,relation,"
                           + "leftright) VALUES (?,?,?,?)";
 
@@ -151,6 +293,14 @@ public class SqliteDriver extends PersistDriver {
                 pStmt.setInt(2, u.getId());
                 pStmt.executeUpdate();
                 setKeyFromStmt(pStmt, r);
+            } catch (SQLException e) {
+                throw new PersistError(e.getMessage());
+            }
+            try (PreparedStatement pStmt = conn.prepareStatement(insertAssessment)) 
+            {
+                pStmt.setInt(1, r.getId());
+                pStmt.setInt(2, 0);
+                pStmt.executeUpdate();
             } catch (SQLException e) {
                 throw new PersistError(e.getMessage());
             }

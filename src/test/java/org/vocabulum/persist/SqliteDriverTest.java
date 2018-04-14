@@ -19,6 +19,7 @@ import org.vocabulum.parser.VokParser;
 import org.vocabulum.parser.VokParserError;
 import org.vocabulum.persist.PersistFactory;
 import org.vocabulum.persist.PersistDriver;
+import org.vocabulum.report.PlainTextReporter;
 
 public class SqliteDriverTest extends TestCase {
 
@@ -71,5 +72,36 @@ public class SqliteDriverTest extends TestCase {
         assertEquals(
                 driver.getUnitNames(), 
                 Arrays.asList(new String[]{ "Lectio I", "Lectio II" }));
+    }
+
+    public void testGetRelationsWithWorstAssessment() throws Exception {
+        List<Relation> unit1 = persistUnit("Lectio I",
+                "incola,ae (f) <-> der Einwohner");
+        List<Relation> unit2 = persistUnit("Lectio II",
+                "populus,i (m) <-> das Volk");
+
+        PersistDriver driver = PersistFactory.createSqlite(databasePath);
+
+        PlainTextReporter reporter = new PlainTextReporter();
+        reporter.addAnswer(unit1.get(0), true);
+        reporter.addAnswer(unit2.get(0), false);
+
+        driver.storeReporter(reporter);
+
+        List<Relation> worst = driver.getRelationsWithWorstAssessment(1);
+
+        assertEquals(worst.get(0), unit2.get(0));
+    }
+
+    public void testGetRelationsWithWorstAssessmentNoAssessment() throws Exception {
+        List<Relation> unit1 = persistUnit("Lectio I",
+                "incola,ae (f) <-> der Einwohner");
+        List<Relation> unit2 = persistUnit("Lectio II",
+                "populus,i (m) <-> das Volk");
+
+        PersistDriver driver = PersistFactory.createSqlite(databasePath);
+
+        List<Relation> worst = driver.getRelationsWithWorstAssessment(2);
+        assertEquals(worst.size(), 2);
     }
 }

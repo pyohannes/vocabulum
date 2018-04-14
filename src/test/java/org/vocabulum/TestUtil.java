@@ -1,4 +1,4 @@
-package org.vocabulum.question;
+package org.vocabulum;
 
 import java.util.List;
 import java.io.BufferedReader;

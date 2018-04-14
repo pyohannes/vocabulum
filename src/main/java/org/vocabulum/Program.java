@@ -18,13 +18,14 @@ import org.vocabulum.parser.VokParser;
 import org.vocabulum.persist.PersistDriver;
 import org.vocabulum.persist.PersistFactory;
 import org.vocabulum.question.PlainTextQuestioner;
+import org.vocabulum.report.PlainTextReporter;
 
 
 public class Program {
 
     private class AddUnit {
-        @Parameter(names = { "--vok", "-v" }, description = "Path to vok file", required = true)
-        private String vokFile = null;
+        @Parameter(names = { "--vok", "-v" }, description = "Path to vok file", required = true, variableArity = true)
+        private List<String> vokFiles = new ArrayList<>();
 
         @Parameter(names = { "--name", "-n" }, description = "Unit name", required = true)
         private String unitName = null;
@@ -48,10 +49,12 @@ public class Program {
 
             VokParser parser = new VokParser();
 
-            FileReader fReader = new FileReader(new File(vokFile));
-            List<Relation> rs = parser.parse(new BufferedReader(fReader));
+            for (String vokFile : vokFiles) {
+                FileReader fReader = new FileReader(new File(vokFile));
+                List<Relation> rs = parser.parse(new BufferedReader(fReader));
             
-            driver.storeUnit(new Unit(unitName, rs)); 
+                driver.storeUnit(new Unit(unitName, rs)); 
+            } 
         }
     }
 
@@ -91,13 +94,17 @@ public class Program {
                 relations = relations.subList(0, quantity);
             } 
     
+            PlainTextReporter reporter = new PlainTextReporter();
             PlainTextQuestioner questioner = new PlainTextQuestioner();
-            questioner.addRelations(relations);
+            questioner
+                .addRelations(relations)
+                .registerReporter(reporter);
     
             Scanner input = new Scanner(System.in);
             while (questioner.hasNext()) {
                 System.out.println(questioner.next() + "?");
                 System.out.print("> ");
+                System.out.flush();
                 if (questioner.answer(input.nextLine())) {
                     System.out.println("Right!");
                 } else {
@@ -106,6 +113,8 @@ public class Program {
                 }
                 System.out.println("");
             }
+
+            System.out.println("\n" + reporter.getReport() + "\n");
         }
     }
 

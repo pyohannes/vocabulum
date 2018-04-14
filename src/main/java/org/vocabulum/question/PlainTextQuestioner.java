@@ -4,7 +4,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.NoSuchElementException;
-import java.util.Collections;
 import java.util.Random;
 
 import org.vocabulum.data.Relation;
@@ -13,24 +12,13 @@ import org.vocabulum.question.Questioner;
 
 
 public class PlainTextQuestioner extends Questioner<String> {
-    private List<Relation> relations;
     private Iterator<Relation> iterRelation = null;
     private Relation currentRelation = null;
     private int currentDirection;
 
-
-    public PlainTextQuestioner() {
-        relations = new ArrayList<Relation>();
-    }
-
-    public void addRelations(List<Relation> r) {
-        relations.addAll(r);
-        Collections.shuffle(relations);
-    }
-
     public String next() {
         if (iterRelation == null) {
-            iterRelation = relations.iterator();
+            iterRelation = getRelations().iterator();
         }
         if (iterRelation.hasNext()) {
             currentRelation = iterRelation.next();
@@ -71,7 +59,7 @@ public class PlainTextQuestioner extends Questioner<String> {
 
     public boolean hasNext() {
         if (iterRelation == null) {
-            return relations.size() > 0;
+            return getRelations().size() > 0;
         } else {
             return iterRelation.hasNext();
         }
@@ -90,14 +78,17 @@ public class PlainTextQuestioner extends Questioner<String> {
 
     public boolean answer(String ans) {
         List<Word> answers;
+        boolean correct = false;
 
         for (Word a : getAnswers()) {
             if (a.getText().equals(ans)) {
-                return true;
+                correct = true;
+                break;
             }
         }
+        reportAnswer(currentRelation, correct);
 
-        return false;
+        return correct;
     }
 
     public String getCorrectAnswer() {

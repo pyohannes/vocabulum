@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.fail;
-import static org.vocabulum.question.TestUtil.makeRelations;
+import static org.vocabulum.TestUtil.makeRelations;
 
 import org.junit.Test;
 import junit.framework.TestCase;

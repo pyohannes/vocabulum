@@ -61,4 +61,18 @@ public class PlainTextQuestionerTest extends TestCase {
         }
         assertFalse(qu.hasNext());
     }
+
+    public void testQuestionSimpleEmpty() throws Exception {
+        List<Relation> rs = makeRelations(
+                "incola,ae (f) <-> der Einwohner\n" +
+                "domus,i (m) <-> das Haus");
+
+        PlainTextQuestioner qu = new PlainTextQuestioner();
+        qu.addRelations(rs);
+
+        qu.next();
+        assertFalse(qu.answer(""));
+        qu.next();
+        assertFalse(qu.answer(null));
+    }
 }

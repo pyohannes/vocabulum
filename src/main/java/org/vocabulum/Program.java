@@ -82,7 +82,6 @@ public class Program {
             List<Relation> relations = new ArrayList<Relation>();
             if (random == true) {
                 for (String unitName : driver.getUnitNames()) {
-                    System.out.println("### reading unit " + unitName);
                     relations.addAll(driver
                             .retrieveUnitByName(unitName)
                             .getRelations());
@@ -100,10 +99,10 @@ public class Program {
                 System.out.println(questioner.next() + "?");
                 System.out.print("> ");
                 if (questioner.answer(input.nextLine())) {
+                    System.out.println("Right!");
+                } else {
                     System.out.println("WRONG!");
                     System.out.println(questioner.getCorrectAnswer());
-                } else {
-                    System.out.println("Right!");
                 }
                 System.out.println("");
             }

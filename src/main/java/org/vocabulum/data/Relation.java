@@ -1,7 +1,7 @@
 package org.vocabulum.data;
 
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.Objects;
 
 import org.vocabulum.data.Word;
@@ -11,15 +11,20 @@ public class Relation extends Data {
 
     public final static short LEFT_TO_RIGHT = 0, RIGHT_TO_LEFT = 1, BOTH = 2;
 
-    private ArrayList<Word> left;
-    private ArrayList<Word> right;
+    private HashSet<Word> left;
+    private HashSet<Word> right;
     private int direction;
 
     public Relation() {
         super(0);
-        left = new ArrayList<Word>();
-        right = new ArrayList<Word>();
+        left = new HashSet<>();
+        right = new HashSet<>();
         direction = LEFT_TO_RIGHT;
+    }
+
+    @Override
+    public int hashCode() {
+        return toString().hashCode();
     }
 
     @Override
@@ -59,11 +64,11 @@ public class Relation extends Data {
         return this;
     }
 
-    public List<Word> getLeft() {
+    public Set<Word> getLeft() {
         return left;
     }
 
-    public List<Word> getRight() {
+    public Set<Word> getRight() {
         return right;
     }
 

@@ -1,5 +1,6 @@
 package org.vocabulum;
 
+import java.util.Set;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +52,7 @@ public class Program {
 
             for (String vokFile : vokFiles) {
                 FileReader fReader = new FileReader(new File(vokFile));
-                List<Relation> rs = parser.parse(new BufferedReader(fReader));
+                Set<Relation> rs = parser.parse(new BufferedReader(fReader));
             
                 driver.storeUnit(new Unit(unitName, rs)); 
             } 

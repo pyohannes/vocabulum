@@ -1,6 +1,6 @@
 package org.vocabulum;
 
-import java.util.List;
+import java.util.Set;
 import java.io.BufferedReader;
 import java.io.StringReader;
 
@@ -12,9 +12,9 @@ import org.vocabulum.question.PlainTextQuestioner;
 
 public class TestUtil {
 
-    public static List<Relation> makeRelations(String vokStr) throws Exception {
+    public static Set<Relation> makeRelations(String vokStr) throws Exception {
         VokParser parser = new VokParser();
-        List<Relation> rs = null;
+        Set<Relation> rs = null;
         try (StringReader sReader = new StringReader(vokStr);
              BufferedReader reader = new BufferedReader(sReader)
         ) {

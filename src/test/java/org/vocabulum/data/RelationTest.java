@@ -2,6 +2,9 @@ package org.vocabulum.data;
 
 import static org.junit.Assert.assertEquals;
 
+import java.util.stream.Stream;
+import java.util.stream.Collectors;
+
 import org.junit.Test;
 
 import org.vocabulum.data.Word;
@@ -17,10 +20,12 @@ public class RelationTest {
             .addLeft(left)
             .addRight(right);
 
-        assertEquals(r.getLeft().size(), 1);
-        assertEquals(r.getRight().size(), 1);
-        assertEquals(r.getLeft().get(0), left);
-        assertEquals(r.getRight().get(0), right);
+        assertEquals(
+                r.getLeft(), 
+                Stream.of(left).collect(Collectors.toSet()));
+        assertEquals(
+                r.getRight(), 
+                Stream.of(right).collect(Collectors.toSet()));
         assertEquals(r.getDirection(), Relation.LEFT_TO_RIGHT);
 
         return r;

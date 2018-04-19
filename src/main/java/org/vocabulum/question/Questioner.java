@@ -2,6 +2,7 @@ package org.vocabulum.question;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Collection;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -23,7 +24,7 @@ public abstract class Questioner<T> implements Iterator<T> {
         return this;
     }
 
-    public Questioner<T> addRelations(List<Relation> r) {
+    public Questioner<T> addRelations(Collection<Relation> r) {
         relations.addAll(r);
         Collections.shuffle(relations);
 

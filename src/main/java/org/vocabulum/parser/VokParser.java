@@ -2,6 +2,8 @@ package org.vocabulum.parser;
 
 import java.util.List;
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 import java.io.BufferedReader;
@@ -20,11 +22,11 @@ public class VokParser {
             //"([^(]*)([^)]*).*");
             "([^(]*)(?:\\(([^)]*)\\))?");
 
-    public List<Relation> parse(BufferedReader reader) 
+    public Set<Relation> parse(BufferedReader reader) 
         throws VokParserError
     {
         String line;
-        List<Relation> relations = new ArrayList<Relation>();
+        Set<Relation> relations = new HashSet<>();
 
         try {
             while ((line = reader.readLine()) != null) {

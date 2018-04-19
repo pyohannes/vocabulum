@@ -9,6 +9,7 @@ import static org.vocabulum.TestUtil.makeRelations;
 import org.junit.Test;
 import junit.framework.TestCase;
 import java.util.List;
+import java.util.Set;
 
 import org.vocabulum.data.Relation;
 import org.vocabulum.parser.VokParser;
@@ -25,7 +26,7 @@ public class PlainTextQuestionerTest extends TestCase {
     }
 
     public void testQuestionSimpleRight() throws Exception {
-        List<Relation> rs = makeRelations(
+        Set<Relation> rs = makeRelations(
                 "incola,ae (f) <-> der Einwohner");
 
         PlainTextQuestioner qu = new PlainTextQuestioner();
@@ -44,7 +45,7 @@ public class PlainTextQuestionerTest extends TestCase {
     }
 
     public void testQuestionSimpleWrong() throws Exception {
-        List<Relation> rs = makeRelations(
+        Set<Relation> rs = makeRelations(
                 "incola,ae (f) <-> der Einwohner");
 
         PlainTextQuestioner qu = new PlainTextQuestioner();
@@ -63,7 +64,7 @@ public class PlainTextQuestionerTest extends TestCase {
     }
 
     public void testQuestionSimpleEmpty() throws Exception {
-        List<Relation> rs = makeRelations(
+        Set<Relation> rs = makeRelations(
                 "incola,ae (f) <-> der Einwohner\n" +
                 "domus,i (m) <-> das Haus");
 

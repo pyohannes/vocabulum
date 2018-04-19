@@ -3,6 +3,8 @@ package org.vocabulum.persist;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
+import java.util.HashSet;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -206,7 +208,7 @@ public class SqliteDriver extends PersistDriver {
         }
     }
 
-    public List<Relation> getRelationsWithWorstAssessment(int maxRet) throws PersistError {
+    public Set<Relation> getRelationsWithWorstAssessment(int maxRet) throws PersistError {
         String selectAssessments = "SELECT relation, rate FROM assessment ORDER BY rate ASC LIMIT ?";
 
         List<Integer> relationIds = new ArrayList<>();
@@ -223,7 +225,7 @@ public class SqliteDriver extends PersistDriver {
         }
 
         String selectRelation = "SELECT * FROM relation WHERE id IN " + getStringQArray(relationIds.size());
-        List<Relation> relations = new ArrayList<>();
+        Set<Relation> relations = new HashSet<>();
         try (PreparedStatement pStmt = conn.prepareStatement(selectRelation)) 
         {
             for (int i = 0; i < relationIds.size(); i++) {

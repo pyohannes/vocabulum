@@ -14,6 +14,11 @@ public class Word extends Data {
     }
 
     @Override
+    public int hashCode() {
+        return toString().hashCode();
+    }
+
+    @Override
     public boolean equals(Object o) {
         return (o instanceof Word) 
             && Objects.equals(((Word) o).getText(), text)

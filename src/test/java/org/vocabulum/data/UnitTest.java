@@ -5,8 +5,8 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 
 import org.junit.Test;
-import java.util.List;
-import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 
 import org.vocabulum.data.Word;
 import org.vocabulum.data.Relation;
@@ -21,15 +21,14 @@ public class UnitTest {
         Relation r = new Relation()
             .addLeft(w1)
             .addRight(w2);
-        List<Relation> rs = new ArrayList<Relation>();
+        Set<Relation> rs = new HashSet<>();
         rs.add(r);
 
         Unit u = new Unit("Lectio I", rs);
 
         assertEquals(u.getName(), "Lectio I");
 
-        List<Relation> uRs = u.getRelations();
-        assertEquals(uRs.size(), 1);
+        Set<Relation> uRs = u.getRelations();
         assertEquals(uRs, rs);
         assertNotSame(uRs, rs);
     }

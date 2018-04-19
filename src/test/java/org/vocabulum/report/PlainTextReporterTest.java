@@ -8,7 +8,7 @@ import static org.vocabulum.TestUtil.makeRelations;
 
 import org.junit.Test;
 import junit.framework.TestCase;
-import java.util.List;
+import java.util.Set;
 
 import org.vocabulum.data.Relation;
 import org.vocabulum.question.PlainTextQuestioner;
@@ -18,10 +18,10 @@ import org.vocabulum.report.PlainTextReporter;
 public class PlainTextReporterTest extends TestCase {
 
     public void testQuestionSimpleEmpty() throws Exception {
-        List<Relation> rs = makeRelations(
+        Set<Relation> rs = makeRelations(
                 "a <-> a\n" +
-                "a <-> a\n" +
-                "a <-> a\n");
+                "b <-> b\n" +
+                "c <-> c\n");
 
         PlainTextReporter reporter = new PlainTextReporter();
         Questioner qu = new PlainTextQuestioner()
@@ -29,16 +29,16 @@ public class PlainTextReporterTest extends TestCase {
             .registerReporter(reporter);
 
         qu.next();
-        assertFalse(qu.answer("b"));
+        qu.answer("a");
         qu.next();
-        assertTrue(qu.answer("a"));
+        qu.answer("a");
         qu.next();
-        assertTrue(qu.answer("a"));
+        qu.answer("a");
 
         assertEquals(reporter.getAnswerCount(), 3);
-        assertEquals(reporter.getRightAnswerCount(), 2);
-        assertEquals(reporter.getWrongAnswerCount(), 1);
-        assertEquals(reporter.getRightAnswerPercentage(), 66);
-        assertEquals(reporter.getWrongAnswerPercentage(), 33);
+        assertEquals(reporter.getRightAnswerCount(), 1);
+        assertEquals(reporter.getWrongAnswerCount(), 2);
+        assertEquals(reporter.getRightAnswerPercentage(), 33);
+        assertEquals(reporter.getWrongAnswerPercentage(), 66);
     }
 }

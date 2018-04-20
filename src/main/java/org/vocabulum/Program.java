@@ -46,6 +46,8 @@ public class Program {
             PersistDriver driver = null;
             if ("sqlite".equals(driverName)) {
                 driver = PersistFactory.createSqlite(source);
+            } else if ("xml".equals(driverName)) {
+                driver = PersistFactory.createXStream(source);
             }
 
             VokParser parser = new VokParser();

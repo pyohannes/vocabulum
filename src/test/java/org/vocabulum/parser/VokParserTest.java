@@ -19,10 +19,10 @@ import org.vocabulum.parser.VokParser;
 
 public class VokParserTest {
 
-    private Relation parseLine(String line) {
+    private Set<Relation> parseLines(String line) {
         VokParser p = new VokParser();
-
         Set<Relation> rs = null;
+
         try (StringReader sReader = new StringReader(line);
              BufferedReader reader = new BufferedReader(sReader)
         ) {
@@ -32,39 +32,16 @@ public class VokParserTest {
         } catch (IOException e) {
             fail("IOException");
         }
-        assertEquals(rs.size(), 1);
 
-        return new ArrayList<Relation>(rs).get(0);
+        return rs;
     }
-
-    /*
-    @Test
-    public void parseSimpleUnidirectionalRelation() {
-        Relation r = parseLine("regnare -> regieren");
-
-        assertEquals(r.getDirection(), Relation.Direction.LEFT_TO_RIGHT);
-        assertEquals(r.getLeft().size(), 1);
-        assertEquals(r.getRight().size(), 1);
-        assertEquals(r.getLeft().get(0), new Word("regnare"));
-        assertEquals(r.getRight().get(0), new Word("regieren"));
-    }
-
-    @Test
-    public void createsSimpleUnidirectionalReversedRelation() {
-        Relation r = parseLine("regieren <- regnare");
-
-        assertEquals(r.getDirection(), Relation.Direction.RIGHT_TO_LEFT);
-        assertEquals(r.getLeft().size(), 1);
-        assertEquals(r.getRight().size(), 1);
-        assertEquals(r.getLeft().get(0), new Word("regieren"));
-        assertEquals(r.getRight().get(0), new Word("regnare"));
-    }
-    */
 
     @Test
     public void parseSimpleBidirectionalRelation() {
-        Relation r = parseLine("regieren <-> regnare");
+        Set<Relation> rs = parseLines("regieren <-> regnare");
+        assertEquals(rs.size(), 1);
 
+        Relation r = rs.iterator().next();
         assertEquals(r.getDirection(), Relation.BOTH);
         assertEquals(
                 r.getLeft(),
@@ -76,8 +53,10 @@ public class VokParserTest {
 
     @Test
     public void parseMultiBidirectionalRelation() {
-        Relation r = parseLine("regieren | herrschen <-> regnare");
+        Set<Relation> rs = parseLines("regieren | herrschen <-> regnare");
+        assertEquals(rs.size(), 1);
 
+        Relation r = rs.iterator().next();
         assertEquals(r.getDirection(), Relation.BOTH);
         assertEquals(
                 r.getLeft(),
@@ -91,8 +70,10 @@ public class VokParserTest {
 
     @Test
     public void parseSimpleBidirectionalAnnotatedRelation() {
-        Relation r = parseLine("ancilla,ae (f) <-> Sklavin");
+        Set<Relation> rs = parseLines("ancilla,ae (f) <-> Sklavin");
+        assertEquals(rs.size(), 1);
 
+        Relation r = rs.iterator().next();
         assertEquals(r.getDirection(), Relation.BOTH);
         assertEquals(
                 r.getLeft(),
@@ -104,8 +85,10 @@ public class VokParserTest {
 
     @Test
     public void parseMultiBidirectionalAnnotatedRelation() {
-        Relation r = parseLine("ancilla,ae (f) <-> Sklavin | Magd");
+        Set<Relation> rs = parseLines("ancilla,ae (f) <-> Sklavin | Magd");
+        assertEquals(rs.size(), 1);
 
+        Relation r = rs.iterator().next();
         assertEquals(r.getDirection(), Relation.BOTH);
         assertEquals(
                 r.getLeft(),
@@ -115,5 +98,11 @@ public class VokParserTest {
                 Stream
                     .of(new Word("Sklavin"), new Word("Magd"))
                     .collect(Collectors.toSet()));
+    }
+
+    @Test
+    public void parseEmptyLines() {
+        Set<Relation> rs = parseLines("ancilla,ae (f) <-> Sklavin | Magd\n\n");
+        assertEquals(rs.size(), 1);
     }
 }

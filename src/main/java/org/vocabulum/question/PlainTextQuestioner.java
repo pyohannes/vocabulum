@@ -73,6 +73,7 @@ public class PlainTextQuestioner extends Questioner<String> {
             Iterator<? extends E> iter = coll.iterator();
             while (index > 0) {
                 iter.next();
+                index -= 1;
             }
             return iter.next();
         }

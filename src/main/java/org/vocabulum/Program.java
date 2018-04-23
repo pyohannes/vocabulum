@@ -24,6 +24,16 @@ import org.vocabulum.report.PlainTextReporter;
 
 public class Program {
 
+    private static PersistDriver getDriver(String driverName, String source) throws Exception {
+        if ("sqlite".equals(driverName)) {
+            return PersistFactory.createSqlite(source);
+        } else if ("xml".equals(driverName)) {
+            return PersistFactory.createXStream(source);
+        }
+
+        throw new IllegalArgumentException("Unsupported driver: " + driverName);
+    }
+
     private class AddUnit {
         @Parameter(names = { "--vok", "-v" }, description = "Path to vok file", required = true, variableArity = true)
         private List<String> vokFiles = new ArrayList<>();
@@ -43,12 +53,7 @@ public class Program {
                 .build()
                 .parse(args);
     
-            PersistDriver driver = null;
-            if ("sqlite".equals(driverName)) {
-                driver = PersistFactory.createSqlite(source);
-            } else if ("xml".equals(driverName)) {
-                driver = PersistFactory.createXStream(source);
-            }
+            PersistDriver driver = Program.getDriver(driverName, source);
 
             VokParser parser = new VokParser();
 
@@ -83,10 +88,7 @@ public class Program {
                 .build()
                 .parse(args);
     
-            PersistDriver driver = null;
-            if ("sqlite".equals(driverName)) {
-                driver = PersistFactory.createSqlite(source);
-            }
+            PersistDriver driver = Program.getDriver(driverName, source);
     
             List<Relation> relations = new ArrayList<Relation>();
             if (random == true) {

@@ -1,6 +1,7 @@
 package org.vocabulum.data;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
@@ -50,5 +51,18 @@ public class RelationTest {
             .setDirection(Relation.BOTH);
 
         assertEquals(r.getDirection(), Relation.BOTH);
+    }
+
+    @Test
+    public void compareRelations() {
+        Relation r1 = createAndAssertSimpleUnidirectionalRelation();
+        Relation r2 = createAndAssertSimpleUnidirectionalRelation();
+        Relation r3 = createAndAssertSimpleUnidirectionalRelation();
+
+        r3.addRight(new Word("herrschen"));
+
+        assertEquals(r1, r2);
+        assertNotEquals(r1, r3);
+        assertNotEquals(r2, r3);
     }
 }

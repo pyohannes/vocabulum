@@ -17,7 +17,7 @@ import org.vocabulum.parser.VokParserError;
 public class VokParser {
 
     private Pattern wordPattern = Pattern.compile(
-            "([^(]*)(?:\\(([^)]*)\\))?");
+            "^([^(]+)(?:\\(([^)]*)\\))?$");
 
     public Set<Relation> parse(BufferedReader reader) 
         throws VokParserError
@@ -41,15 +41,20 @@ public class VokParser {
     }
 
     private Relation parseLine(String line) throws VokParserError {
+        // Remove comments
+        line = line.split("#")[0];
+
+        // Remove withespaces
         line = line.trim();
 
+        // Ignore empty lines
         if (line.length() == 0) {
             return null;
         }
 
         String[] parts = line.split("<->");
         if (parts.length != 2) {
-            throw new VokParserError("No <-> in: " + line);
+            throw new VokParserError("Vok syntax error in: " + line);
         }
 
         Relation r = new Relation()
@@ -69,7 +74,7 @@ public class VokParser {
         List<Word> words = new ArrayList<Word>();
 
         for (String wordFull : s.split("\\|")) {
-            Matcher m = wordPattern.matcher(wordFull);
+            Matcher m = wordPattern.matcher(wordFull.trim());
 
             if (!m.find()) {
                 throw new VokParserError("Syntax error in: " + wordFull);

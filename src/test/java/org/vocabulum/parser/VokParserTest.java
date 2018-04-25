@@ -19,7 +19,7 @@ import org.vocabulum.parser.VokParser;
 
 public class VokParserTest {
 
-    private Set<Relation> parseLines(String line) {
+    private Set<Relation> parseLines(String line) throws VokParserError {
         VokParser p = new VokParser();
         Set<Relation> rs = null;
 
@@ -27,8 +27,6 @@ public class VokParserTest {
              BufferedReader reader = new BufferedReader(sReader)
         ) {
             rs = p.parse(reader);
-        } catch (VokParserError e) {
-            fail("VokParserError");
         } catch (IOException e) {
             fail("IOException");
         }
@@ -37,7 +35,7 @@ public class VokParserTest {
     }
 
     @Test
-    public void parseSimpleBidirectionalRelation() {
+    public void parseSimpleBidirectionalRelation() throws Exception {
         Set<Relation> rs = parseLines("regieren <-> regnare");
         assertEquals(rs.size(), 1);
 
@@ -52,7 +50,7 @@ public class VokParserTest {
     }
 
     @Test
-    public void parseMultiBidirectionalRelation() {
+    public void parseMultiBidirectionalRelation() throws Exception {
         Set<Relation> rs = parseLines("regieren | herrschen <-> regnare");
         assertEquals(rs.size(), 1);
 
@@ -69,7 +67,7 @@ public class VokParserTest {
     }
 
     @Test
-    public void parseSimpleBidirectionalAnnotatedRelation() {
+    public void parseSimpleBidirectionalAnnotatedRelation() throws Exception {
         Set<Relation> rs = parseLines("ancilla,ae (f) <-> Sklavin");
         assertEquals(rs.size(), 1);
 
@@ -84,7 +82,7 @@ public class VokParserTest {
     }
 
     @Test
-    public void parseMultiBidirectionalAnnotatedRelation() {
+    public void parseMultiBidirectionalAnnotatedRelation() throws Exception {
         Set<Relation> rs = parseLines("ancilla,ae (f) <-> Sklavin | Magd");
         assertEquals(rs.size(), 1);
 
@@ -101,8 +99,30 @@ public class VokParserTest {
     }
 
     @Test
-    public void parseEmptyLines() {
+    public void parseEmptyLines() throws Exception {
         Set<Relation> rs = parseLines("ancilla,ae (f) <-> Sklavin | Magd\n\n");
         assertEquals(rs.size(), 1);
+    }
+
+    @Test
+    public void parseComment() throws Exception {
+        Set<Relation> rs = parseLines("ancilla,ae (f) <-> Sklavin | Magd # <-> comment");
+        assertEquals(rs.size(), 1);
+    }
+
+    @Test
+    public void parseCommentLines() throws Exception {
+        Set<Relation> rs = parseLines("#ancilla,ae (f) <-> Sklavin | Magd");
+        assertEquals(rs.size(), 0);
+    }
+
+    @Test(expected = VokParserError.class)
+    public void parseSyntaxRelationError() throws Exception {
+        parseLines("ancilla,ae (f) - Sklavin | Magd");
+    }
+
+    @Test(expected = VokParserError.class)
+    public void parseSyntaxWordError() throws Exception {
+        parseLines("ancilla,ae (f) <->(Sklavin)");
     }
 }

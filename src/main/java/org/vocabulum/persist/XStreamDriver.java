@@ -24,13 +24,13 @@ public class XStreamDriver extends CompletePersistDriver {
 
     public XStreamDriver(String filename) throws PersistError {
         super();
-        this.file = new File(filename).toPath();
-        this.xstream = new XStream();
-        this.xstream.alias("data", CompletePersistDriver.CompleteData.class);
-        this.xstream.alias("map", HashMap.class);
-        this.xstream.alias("unit", Unit.class);
-        this.xstream.alias("relation", Relation.class);
-        this.xstream.alias("word", Word.class);
+        file = new File(filename).toPath();
+        xstream = new XStream();
+        xstream.alias("data", CompletePersistDriver.CompleteData.class);
+        xstream.alias("map", HashMap.class);
+        xstream.alias("unit", Unit.class);
+        xstream.alias("relation", Relation.class);
+        xstream.alias("word", Word.class);
         load();
     }
 

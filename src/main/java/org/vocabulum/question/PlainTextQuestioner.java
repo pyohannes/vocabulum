@@ -7,6 +7,7 @@ import java.util.HashSet;
 import java.util.NoSuchElementException;
 import java.util.Random;
 import java.util.Collection;
+import java.util.Arrays;
 
 import org.vocabulum.data.Relation;
 import org.vocabulum.data.Word;
@@ -18,6 +19,7 @@ public class PlainTextQuestioner extends Questioner<String> {
     private Relation currentRelation = null;
     private int currentDirection;
     private Random rand = new Random();
+    private static final List<Short> leftRightDirection = Arrays.asList(Relation.LEFT_TO_RIGHT, Relation.RIGHT_TO_LEFT);
 
     public String next() {
         if (iterRelation == null) {
@@ -31,18 +33,12 @@ public class PlainTextQuestioner extends Questioner<String> {
         }
     }
 
-    private int randomDirection() {
-        int[] directions = new int[]{ Relation.LEFT_TO_RIGHT, Relation.RIGHT_TO_LEFT };
-        int index = new Random().nextInt(directions.length);
-        return directions[index];
-    }
-
     private String getNextQuestion() {
         Set<Word> possibilities;
 
         currentDirection = currentRelation.getDirection();
         if (currentDirection == Relation.BOTH) {
-            currentDirection = randomDirection();
+            currentDirection = choice(leftRightDirection, rand);
         }
 
         if (currentDirection == Relation.LEFT_TO_RIGHT) {
@@ -51,14 +47,18 @@ public class PlainTextQuestioner extends Questioner<String> {
             possibilities = currentRelation.getRight();
         }
 
-        //int index = new Random().nextInt(possibilities.size());
-        //Word w = possibilities.get(index);
-        Word w = choice(possibilities, rand);
-        String text = w.getText();
-        if (w.getAnnotation() != null) {
-            text += " (" + w.getAnnotation() + ")";
+        StringBuilder text = new StringBuilder();
+        for (Word w : possibilities) {
+            text.append(w.getText());
+            if (w.getAnnotation() != null) {
+                text.append(" (");
+                text.append(w.getAnnotation());
+                text.append(")");
+            }
+            text.append(" | ");
         }
-        return text;
+        text.delete(text.length() - 3, text.length() - 1);
+        return text.toString().trim();
     }
 
     public static <E> E choice(Collection<? extends E> coll, Random rand) throws IllegalArgumentException {

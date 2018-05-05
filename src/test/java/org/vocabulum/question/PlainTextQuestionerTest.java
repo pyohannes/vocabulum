@@ -44,6 +44,25 @@ public class PlainTextQuestionerTest extends TestCase {
         assertFalse(qu.hasNext());
     }
 
+    public void testQuestionMultiple() throws Exception {
+        Set<Relation> rs = makeRelations(
+                "pulcher,pulchra,um | bellus,a,um  <-> anmutig | vortrefflich");
+
+        PlainTextQuestioner qu = new PlainTextQuestioner();
+        qu.addRelations(rs);
+
+        assertTrue(qu.hasNext());
+        String question = qu.next();
+        if (question.equals("pulcher,pulchra,um | bellus,a,um")) {
+            assertTrue(qu.answer("anmutig"));
+        } else if (question.equals("anmutig | vortrefflich")) {
+            assertTrue(qu.answer("bellus,a,um"));
+        } else {
+            fail("Returned -" + question + "-");
+        }
+        assertFalse(qu.hasNext());
+    }
+
     public void testQuestionSimpleWrong() throws Exception {
         Set<Relation> rs = makeRelations(
                 "incola,ae (f) <-> der Einwohner");
